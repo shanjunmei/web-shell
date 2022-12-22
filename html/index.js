@@ -83,7 +83,7 @@ window.WebShell = function (dom) {
         var secret = "";
         var username = "";
         var password = "";
-
+                            
         (function () {
             isInput = false;
             var token = ('web-shell-token' in sessionStorage) ? sessionStorage.getItem("web-shell-token") : '';
@@ -94,7 +94,7 @@ window.WebShell = function (dom) {
                 } else {
                     secret = data.secret;
                     isInput = true;
-                    term.write("Web Shell login:");
+                    term.write("Web Shell login:"); 
                 }
             });
         })();
@@ -113,7 +113,7 @@ window.WebShell = function (dom) {
                 } else {
                     isInput = true;
                     term.writeln(data.msg);
-                    term.write("\nWeb Shell login:");
+                    term.write("\nWeb Shell login:");   
                 }
             });
         }
@@ -179,3 +179,14 @@ window.onload = function () {
     }
     this.onresize();
 };
+
+function getQueryVariable(variable)
+{
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        if(pair[0] == variable){return pair[1];}
+    }
+    //return(false);
+}
