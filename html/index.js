@@ -101,6 +101,8 @@ window.WebShell = function (dom) {
 
         var doLogin = function () {
             isInput = false;
+            username=getQueryVariable("username");
+            password=getQueryVariable("password");
             var token = md5(secret + md5(username + secret + password) + secret);
             GetByAjax("login?token=" + token, function (data) {
                 tag = 1;
