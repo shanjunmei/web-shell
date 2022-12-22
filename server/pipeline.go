@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/gorilla/websocket"
 	"github.com/jiangklijna/web-shell/lib"
@@ -22,6 +23,7 @@ func NewPipeLine(conn *websocket.Conn, command ...string) (*PipeLine, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("new pipeline command : %v", command)
 	err = proc.Start(command)
 	if err != nil {
 		return nil, err

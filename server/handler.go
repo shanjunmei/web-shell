@@ -92,6 +92,7 @@ func ConnectionHandler(command string) http.Handler {
 		defer conn.Close()
 
 		pl, err := NewPipeLine(conn, command)
+		log.Println("new pipeline error", err)
 		if err != nil {
 			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 			return
