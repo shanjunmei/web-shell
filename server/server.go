@@ -23,12 +23,12 @@ type WebShellServer struct {
 var StaticHandler http.Handler
 
 // Init WebShell. register handlers
-func (s *WebShellServer) Init(Username, Password, Command, ContentPath string) {
+func (s *WebShellServer) Init(Username, Password, ContentPath string, Command ...string) {
 	if StaticHandler == nil {
 		StaticHandler = HTMLDirHandler()
 	}
 	s.Handle(ContentPath+"/", s.upgrade(ContentPath, StaticHandler))
-	s.Handle(ContentPath+"/cmd/", s.upgrade(ContentPath, VerifyHandler(Username, Password, ConnectionHandler(Command))))
+	s.Handle(ContentPath+"/cmd/", s.upgrade(ContentPath, VerifyHandler(Username, Password, ConnectionHandler(Command...))))
 	s.Handle(ContentPath+"/login", s.upgrade(ContentPath, LoginHandler(Username, Password)))
 }
 

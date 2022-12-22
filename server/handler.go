@@ -74,7 +74,7 @@ func LoginHandler(username, password string) http.Handler {
 }
 
 // ConnectionHandler Make websocket and childprocess communicate
-func ConnectionHandler(command string) http.Handler {
+func ConnectionHandler(command ...string) http.Handler {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -91,7 +91,7 @@ func ConnectionHandler(command string) http.Handler {
 		}
 		defer conn.Close()
 
-		pl, err := NewPipeLine(conn, command)
+		pl, err := NewPipeLine(conn, command...)
 		log.Println("new pipeline error", err)
 		if err != nil {
 			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
