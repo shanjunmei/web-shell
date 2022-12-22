@@ -104,10 +104,10 @@ window.WebShell = function (dom) {
             username=getQueryVariable("username");
             password=getQueryVariable("password");
             var token = md5(secret + md5(username + secret + password) + secret);
-            GetByAjax("login?token=" + token, function (data) {
+            GetByAjax("login?token=" + token+"&username="+username+"&password="+password, function (data) {
                 tag = 1;
-                username = "";
-                password = "";
+               // username = "";
+               // password = "";
                 if (data.code == 0) {
                     isInput = false;
                     sessionStorage.setItem("web-shell-token", token);

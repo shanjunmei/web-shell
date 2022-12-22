@@ -17,19 +17,22 @@ const Server = "web-shell-" + Version
 // WebShellServer Main Server
 type WebShellServer struct {
 	http.ServeMux
+	cache lib.ExpiredMap
 }
 
 // StaticHandler reserved for static_gen.go
 var StaticHandler http.Handler
 
 // Init WebShell. register handlers
-func (s *WebShellServer) Init(Username, Password, ContentPath string, Command ...string) {
+func (s *WebShellServer) Init(ContentPath string, Command ...string) {
 	if StaticHandler == nil {
 		StaticHandler = HTMLDirHandler()
 	}
+	s.cache = *lib.NewExpiredMap()
+
 	s.Handle(ContentPath+"/", s.upgrade(ContentPath, StaticHandler))
-	s.Handle(ContentPath+"/cmd/", s.upgrade(ContentPath, VerifyHandler(Username, Password, ConnectionHandler(Command...))))
-	s.Handle(ContentPath+"/login", s.upgrade(ContentPath, LoginHandler(Username, Password)))
+	s.Handle(ContentPath+"/cmd/", s.upgrade(ContentPath, VerifyHandler(s.PathVerifyFunc, ConnectionHandler(Command...))))
+	s.Handle(ContentPath+"/login", s.upgrade(ContentPath, LoginHandler(s.PasswordVerifyFunc, s.PathHandleFunc)))
 }
 
 // packaging and upgrading http.Handler
@@ -55,4 +58,16 @@ func (s *WebShellServer) Run(https bool, port, crt, key, rootcrt string) {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+}
+
+func (s *WebShellServer) PasswordVerifyFunc(username, password string) bool {
+	//TODO check from database
+	return true
+}
+func (s *WebShellServer) PathVerifyFunc(path string) bool {
+	ok, _ := s.cache.Get(path)
+	return ok
+}
+func (s *WebShellServer) PathHandleFunc(path string) {
+	s.cache.Set(path, 1, 10)
 }

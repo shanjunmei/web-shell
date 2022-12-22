@@ -29,16 +29,17 @@ func GetMethodHandler(next http.Handler) http.Handler {
 }
 
 // VerifyHandler Login verification
-func VerifyHandler(username, password string, next http.Handler) http.Handler {
+func VerifyHandler(verify func(path string) bool, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := strings.TrimPrefix(r.URL.Path, "/cmd/")
 		if len(path) < 10 {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		clientIP := r.RemoteAddr[0:strings.LastIndex(r.RemoteAddr, ":")]
-		_, _, correctPath := lib.GenerateAll(username, password, clientIP, r.UserAgent())
-		if path != correctPath {
+		//clientIP := r.RemoteAddr[0:strings.LastIndex(r.RemoteAddr, ":")]
+		//_, _, correctPath := lib.GenerateAll(username, password, clientIP, r.UserAgent())
+		var validPath = verify(path)
+		if !validPath {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
@@ -47,7 +48,7 @@ func VerifyHandler(username, password string, next http.Handler) http.Handler {
 }
 
 // LoginHandler Login interface
-func LoginHandler(username, password string) http.Handler {
+func LoginHandler(verify func(username, pasword string) bool, pathHandleFunc func(path string)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/json; charset=utf-8")
 		clientIP := r.RemoteAddr[0:strings.LastIndex(r.RemoteAddr, ":")]
@@ -56,6 +57,13 @@ func LoginHandler(username, password string) http.Handler {
 		token := r.URL.Query().Get("token")
 		if token == "" {
 			w.Write([]byte("{\"code\":1,\"msg\":\"invalid token!\",\"secret\":\"" + secret + "\"}"))
+			return
+		}
+		username := r.URL.Query().Get("username")
+		password := r.URL.Query().Get("password")
+		userValid := verify(username, password)
+		if !userValid {
+			w.Write([]byte("{\"code\":1,\"msg\":\"invalid user!\",\"secret\":\"" + secret + "\"}"))
 			return
 		}
 
@@ -68,6 +76,7 @@ func LoginHandler(username, password string) http.Handler {
 			return
 		}
 		path := lib.GeneratePath(secret, token)
+		pathHandleFunc(path)
 		// login success
 		w.Write([]byte("{\"code\":0,\"msg\":\"login success!\",\"path\":\"" + path + "\"}"))
 	})
@@ -92,7 +101,6 @@ func ConnectionHandler(command ...string) http.Handler {
 		defer conn.Close()
 
 		pl, err := NewPipeLine(conn, command...)
-		log.Println("new pipeline error", err)
 		if err != nil {
 			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 			return
