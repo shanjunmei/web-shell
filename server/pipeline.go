@@ -17,12 +17,12 @@ type PipeLine struct {
 }
 
 // NewPipeLine Malloc PipeLine
-func NewPipeLine(conn *websocket.Conn, command string) (*PipeLine, error) {
+func NewPipeLine(conn *websocket.Conn, command ...string) (*PipeLine, error) {
 	proc, err := console.New(120, 60)
 	if err != nil {
 		return nil, err
 	}
-	err = proc.Start([]string{command})
+	err = proc.Start(command)
 	if err != nil {
 		return nil, err
 	}
