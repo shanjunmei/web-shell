@@ -43,3 +43,4 @@ static_gen.go
 *.pem
 *.public
 make/web-shell-make*
+web-shell*
