@@ -64,7 +64,7 @@ func (parms *Parameter) Init() {
 func (parms *Parameter) Run() {
 	if parms.Server {
 		s := new(server.WebShellServer)
-		s.Init(parms.Username, parms.Password, parms.Command, parms.ContentPath)
+		s.Init(parms.Username, parms.Password, parms.ContentPath, strings.Split(parms.Command, " ")...)
 		s.Run(parms.HTTPS, parms.Port, parms.CrtFile, parms.KeyFile, parms.RootCrtFile)
 	} else if parms.Client {
 		c := new(client.WebShellClient)
